@@ -25,19 +25,23 @@ jobs:
 
       - name: Install Dependencies & Build Web App
         run: |
-          npm install
+          PKG_DIR=$(dirname $(find . -name "package.json" -not -path "*/node_modules/*" | head -n 1))
+          echo "APP_DIR=$PKG_DIR" >> $GITHUB_ENV
+          cd "$PKG_DIR"
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Initialize Capacitor & Add Android
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          cd "$APP_DIR"
+          npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "DukaPulse" "com.dukapulse.app" --web-dir=dist
           npx cap add android
           npx cap sync android
 
       - name: Build Debug APK
         run: |
-          cd android
+          cd "$APP_DIR/android"
           chmod +x gradlew
           ./gradlew assembleDebug
 
@@ -45,4 +49,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DukaPulse-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.APP_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
