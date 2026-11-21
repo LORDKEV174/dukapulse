@@ -1,0 +1,6 @@
+{
+  "name": "DukaPulse",
+  "description": "Offline-first retail POS, M-Pesa verification, Deni ledger, and stock management PWA built for Kenyan shopkeepers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
