@@ -1,0 +1,48 @@
+name: Build DukaPulse Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Dependencies & Build Web App
+        run: |
+          npm install
+          npm run build
+
+      - name: Initialize Capacitor & Add Android
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "DukaPulse" "com.dukapulse.app" --web-dir=dist
+          npx cap add android
+          npx cap sync android
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload DukaPulse APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DukaPulse-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
